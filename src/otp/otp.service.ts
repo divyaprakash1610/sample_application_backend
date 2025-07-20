@@ -16,7 +16,8 @@ export class OtpService {
   }
 
   async verifyOtp(email: string, code: string): Promise<boolean> {
-    const otpDoc = await this.otpModel.findOne({ email, code });
+    const now = new Date();
+    const otpDoc = await this.otpModel.findOne({ email, code, expiresAt: { $gt: now } });
     return !!otpDoc;
   }
 }

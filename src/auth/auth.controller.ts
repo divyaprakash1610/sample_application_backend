@@ -73,6 +73,7 @@ export class AuthController {
     if (!isValid) {
       throw new BadRequestException('Invalid or expired OTP');
     }
+    
 
     const user = await this.usersService.findByEmail(email);
     if (!user) throw new NotFoundException('User not found');
