@@ -1,26 +1,39 @@
-import {Prop,Schema,SchemaFactory} from '@nestjs/mongoose';
-import {Document} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
-@Schema()
+
+@Schema({ timestamps: true }) // adds createdAt & updatedAt automatically
 export class User {
-    @Prop({required:true,unique: true})
-    email:string;
+  @Prop({ required: true, unique: true })
+  email: string;
 
-    @Prop({required:false})
-    password?:string;
+  @Prop()
+  password?: string; // only for email/password signups
 
-    // @Prop({default:Date.now})
-    // createdAt:Date;
+  @Prop({ default: false })
+  isVerified: boolean;
 
-    // @Prop({default:Date.now})
-    // updatedAt:Date;
-    @Prop({ default: false })
-    isVerified: boolean;
+  @Prop()
+  googleId?: string; // for Google auth
 
-    @Prop()
-    googleId?: string;
+  // ✅ Additional profile fields
+  @Prop()
+  fname?: string;
+  @Prop()
+  lname?: string;
 
+  @Prop()
+  employeeId?: string;
+
+  @Prop()
+  mobileNo?: string;
+
+  @Prop()
+  designation?: string; // e.g., Operator, Supervisor, Admin
+
+  @Prop()
+  profilePhotoPath?: string; // local or cloud storage URL
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

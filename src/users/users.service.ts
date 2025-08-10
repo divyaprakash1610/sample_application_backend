@@ -16,6 +16,9 @@ async updatePassword(userId: string, newPassword: string): Promise<User | null> 
   const hashed = await bcrypt.hash(newPassword, 10);
   return this.userModel.findByIdAndUpdate(userId, { password: hashed }, { new: true });
 }
+async updateProfile(email: string, updateData: Partial<User>): Promise<UserDocument | null> {
+    return this.userModel.findOneAndUpdate({ email }, updateData, { new: true }).exec();
+  }
 
   
   async findByEmail(email: string): Promise<User | null> {

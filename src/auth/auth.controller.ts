@@ -153,8 +153,21 @@ export class AuthController {
     };
   }
 
+@Post('complete-profile')
+async completeProfile(@Body() profileData: {
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  employeeId?: string;
+  mobileNo?: string;
+  designation?: string;
+  profilePhotoPath?: string;
+}) {
+  const updatedUser = await this.usersService.updateProfile(profileData.email, profileData);
+  return { message: 'Profile updated successfully', user: updatedUser };
+}
+
   // New: Mobile Google Sign-In with ID Token verification
-  
   @Post('google-mobile')
 async googleMobileAuth(@Body('idToken') idToken: string) {
   console.log('Received ID Token:', idToken);
@@ -166,9 +179,9 @@ async googleMobileAuth(@Body('idToken') idToken: string) {
   let payload;
   try {
     const ticket = await this.googleClient.verifyIdToken({
-  idToken,
-  audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
-});
+      idToken,
+      audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+    });
 
     payload = ticket.getPayload();
     console.log('Google Payload:', payload);
@@ -184,8 +197,10 @@ async googleMobileAuth(@Body('idToken') idToken: string) {
     throw new BadRequestException('Missing email or Google ID from payload');
   }
 
+  let isNewUser = false;
   let user = await this.usersService.findByEmail(email);
   if (!user) {
+    isNewUser = true;
     user = await this.usersService.create({
       email,
       googleId,
@@ -193,11 +208,20 @@ async googleMobileAuth(@Body('idToken') idToken: string) {
     });
   }
 
-  const token = this.authService.generateJwt(user);
-  return {
+  console.log('Is new user?:', isNewUser);
+
+  // Prepare the response object
+  const response = {
     message: 'Google login success',
-    token,
+    token: this.authService.generateJwt(user),
     user,
+    isNewUser,
   };
+
+  // ✅ Print it to backend console
+  console.log('Google Mobile Auth Response:', JSON.stringify(response, null, 2));
+
+  // Send it to the frontend
+  return response;
 }
 }
