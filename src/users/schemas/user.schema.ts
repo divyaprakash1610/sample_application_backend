@@ -34,6 +34,12 @@ export class User {
 
   @Prop()
   profilePhotoPath?: string; // local or cloud storage URL
+
+   // ✅ Google OAuth tokens (encrypted before saving)
+  @Prop()
+  accessToken?: string;
+
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

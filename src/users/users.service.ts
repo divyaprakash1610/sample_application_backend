@@ -29,4 +29,13 @@ async updateProfile(email: string, updateData: Partial<User>): Promise<UserDocum
   await this.userModel.updateOne({ email }, { isVerified: true });
 }
 
+async updateTokens(userId: string, accessToken: string) {
+  console.log('Updating tokens for userId:', userId);
+  return this.userModel.findByIdAndUpdate(
+    userId,
+    { accessToken },
+    { new: true },
+  );
+}
+
 }

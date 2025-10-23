@@ -21,4 +21,20 @@ export class MailService {
 
     return await this.transporter.sendMail(mailOptions);
   }
+   async sendErrorEmail(adminEmail: string, partName: string, projectName: string, stepName: string, errorDetails: string) {
+    const mailOptions = {
+      from: `"Sample App Error" <${process.env.MAIL_USER}>`,
+      to: adminEmail,
+      subject: `Error in Validation - ${partName}`,
+      html: `
+        <p>An error occurred during validation.</p>
+        <p><strong>Part:</strong> ${partName}</p>
+        <p><strong>Project:</strong> ${projectName}</p>
+        <p><strong>Step:</strong> ${stepName}</p>
+        <p><strong>Error Details:</strong> ${errorDetails}</p>
+        <p>Please review the issue immediately.</p>
+      `,
+    };
+    return await this.transporter.sendMail(mailOptions);
+  }
 }

@@ -18,6 +18,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { MailService } from 'src/mail/mail.service';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
+import { UserDocument } from 'src/users/schemas/user.schema';
 
 @Controller('auth')
 export class AuthController {
@@ -121,6 +122,7 @@ export class AuthController {
     return {
       message: 'Login successful',
       token,
+      user,
     };
   }
 
@@ -169,8 +171,12 @@ async completeProfile(@Body() profileData: {
 
   // New: Mobile Google Sign-In with ID Token verification
   @Post('google-mobile')
-async googleMobileAuth(@Body('idToken') idToken: string) {
+async googleMobileAuth(@Body('idToken') idToken: string, @Body('accessToken') accessToken: string) {
   console.log('Received ID Token:', idToken);
+  console.log('Received Access Token:', accessToken);
+  if (!idToken || !accessToken) {
+    throw new BadRequestException('ID token and Access token are required');
+  }
 
   if (!idToken) {
     throw new BadRequestException('ID token must be provided');
@@ -198,7 +204,7 @@ async googleMobileAuth(@Body('idToken') idToken: string) {
   }
 
   let isNewUser = false;
-  let user = await this.usersService.findByEmail(email);
+  let user = await this.usersService.findByEmail(email) as UserDocument;
   if (!user) {
     isNewUser = true;
     user = await this.usersService.create({
@@ -209,12 +215,14 @@ async googleMobileAuth(@Body('idToken') idToken: string) {
   }
 
   console.log('Is new user?:', isNewUser);
+   await this.usersService.updateTokens(String(user._id), accessToken,);
 
   // Prepare the response object
   const response = {
     message: 'Google login success',
     token: this.authService.generateJwt(user),
     user,
+    accessToken,
     isNewUser,
   };
 
